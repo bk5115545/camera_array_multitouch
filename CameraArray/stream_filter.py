@@ -20,7 +20,7 @@ class StreamFilter(Thread):
         self.operations = []
         self.bg_subtractors = { "MOG":cv2.BackgroundSubtractorMOG(),    \
                                 "MOG2": cv2.BackgroundSubtractorMOG2(), \
-##                                "GMG": cv2.BackgroundSubtractorGMG()    \
+##                              "GMG": cv2.BackgroundSubtractorGMG()    \
                               }
 
     def get_id(self):
@@ -56,14 +56,12 @@ class StreamFilter(Thread):
 
     def run(self):
         while True:
-        #    frame, device_id = self.inputQueue.get(True)
-            frame = None
+            frame, device_id = self.inputQueue.get(True)
 
             for operation in self.operations:
-                #print operation[1]
                 if not operation[1]:
                     frame = operation[0](frame)
                 else:
                     frame = operation[0](frame, **operation[1])
 
-        #    self.outputQueue.put((frame, device_id))
+            self.outputQueue.put((frame, device_id))
