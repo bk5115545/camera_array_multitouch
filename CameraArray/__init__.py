@@ -9,6 +9,4 @@ import sys
 from camera_device import CameraDevice
 from stream_filter import StreamFilter
 
-
 __all__ = [ 'CameraDevice' , 'StreamFilter' ]
-

@@ -18,6 +18,10 @@ class StreamFilter(Thread):
         self.outputQueue = Queue.Queue()
 
         self.operations = []
+        self.bg_subtractors = { "MOG":cv2.BackgroundSubtractorMOG(),    \
+                                "MOG2": cv2.BackgroundSubtractorMOG2(), \
+##                                "GMG": cv2.BackgroundSubtractorGMG()    \
+                              }
 
     def get_id(self):
         return self.id
@@ -36,20 +40,15 @@ class StreamFilter(Thread):
     # Operations
     ##########
 
-    def bg_subtraction(self, frame):
-		if isinstance(frame, (np.ndarray, np.generic)):
-			return self.bg_subtractor.apply(frame)
-		else:
-			return frame
+    def bg_subtraction_mog(self, frame, algo="MOG"):
 
-    def printHello(self, frame, Value=0):
-        print "Hello " + str(Value)
-
-    def printSomething(self, frame, Value=0, Blah=0):
-        print "Something " + str(Value) + str(Blah)
-
-    def printGoodBye(self, frame):
-        print "Goodbye"
+        if isinstance(frame, (np.ndarray, np.generic)):
+            try:
+                return self.bg_subtractors[algo.uppercase()].apply(frame)
+            except:
+                return Exception("No such background subtraction algorithm.")
+        else:
+            return frame
 
     ##########
     # Run Function

@@ -6,10 +6,6 @@ from CameraArray import StreamFilter
 
 s_filter = StreamFilter(0)
 
-s_filter.add_operation(s_filter.printGoodBye)
-s_filter.add_operation(s_filter.printSomething, Value=1, Blah=3)
-
-s_filter.add_operation(s_filter.printHello, Value=1)
-s_filter.add_operation(s_filter.printHello, Value=2)
+s_filter.add_operation(s_filter.bg_subtraction_mog, algo="MOG2")
 
 s_filter.start()
