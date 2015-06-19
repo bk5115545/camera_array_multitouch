@@ -1,5 +1,6 @@
 
 #include "camera_device.h"
+#include <opencv3/opencv.hpp>
 
 CameraDevice::CameraDevice(int id) {
     device_id = id;
@@ -24,4 +25,8 @@ int CameraDevice::GetScreenWidth() {
 
 int CameraDevice::GetScreenHeight() {
     return screen_height;
+}
+
+void AcquireCamera() {
+
 }

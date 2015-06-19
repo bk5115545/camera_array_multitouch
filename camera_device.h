@@ -1,3 +1,4 @@
+
 #ifndef camera_device_h
 #define camera_device_h
 
@@ -15,6 +16,8 @@ public:
     int GetScreenWidth();
     int GetScreenHeight();
 
+    void AcquireCamera();
+    void ReleaseCamera();
 };
 
 #endif // camera_device_h

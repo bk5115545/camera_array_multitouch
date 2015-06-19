@@ -1,4 +1,6 @@
 
+// To compile:g++ cameras.cc camera_device.cc
+
 #include "camera_device.h"
 #include <iostream>
 
