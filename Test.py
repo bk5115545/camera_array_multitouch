@@ -1,8 +1,9 @@
 
-# Written By Alex Jaeger and Blaise Koch UALR EAC 2015
+# Written By Blaise Koch and Alex Jaeger UALR EAC 2015
 ### Tests stream_filter.py method choosing
 
-from stream_filter import StreamFilter
+
+import CameraArray
 
 s_filter = StreamFilter(0)
 

@@ -1,4 +1,5 @@
-# Written By Blaise Koch and Alex Jaeger UALR EAC 2015
+
+# Written By Alex Jaeger and Blaise Koch UALR EAC 2015
 
 import sys, cv2
 from threading import Thread, Event
