@@ -20,7 +20,7 @@ if __name__ == "__main__":
 
 	bg_sub_stream.add_operation(bg_sub_stream.bg_subtraction, algo="MOG")
 
-	stream.start()
+	bg_sub_stream.start()
 
 	for ID in device_ids:
 		device = CameraDevice(ID)
