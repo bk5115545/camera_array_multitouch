@@ -40,13 +40,13 @@ class StreamFilter(Thread):
     # Operations
     ##########
 
-    def bg_subtraction_mog(self, frame, algo="MOG"):
+    def bg_subtraction(self, frame, algo="MOG"):
 
         if isinstance(frame, (np.ndarray, np.generic)):
             try:
                 return self.bg_subtractors[algo.uppercase()].apply(frame)
             except:
-                return Exception("No such background subtraction algorithm.")
+                return Exception("No such background subtraction algorithm.\nValid algorithms are " + ", ".join(bg_subtractors.keys()))
         else:
             return frame
 
@@ -56,7 +56,13 @@ class StreamFilter(Thread):
 
     def run(self):
         while True:
-            frame, device_id = self.inputQueue.get(True)
+            frame = None
+            device_id = -1
+            try:
+                frame, device_id = self.inputQueue.get(True)
+            except:  #Queue.get has an implicit timeout that we should catch and try again on 
+                continue
+            
 
             for operation in self.operations:
                 if not operation[1]:

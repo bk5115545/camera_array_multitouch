@@ -1,6 +1,5 @@
 # Written By Blaise Koch and Alex Jaeger UALR EAC 2015
 
-
 from CameraArray import *
 
 import cv2
