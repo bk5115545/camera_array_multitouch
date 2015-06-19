@@ -1,3 +1,6 @@
+
+# Written By Alex Jaeger and Blaise Koch UALR EAC 2015
+
 import cv2
 import sys, time
 
@@ -25,7 +28,6 @@ if __name__ == "__main__":
 
 			s_filter.start()
 			streams.extend([s_filter])
-
 
 		try:
 			while True:

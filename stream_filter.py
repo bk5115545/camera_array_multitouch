@@ -1,33 +1,40 @@
 
+# Written By Alex Jaeger and Blaise Koch UALR EAC 2015
+
+from threading import Thread, Event
 import numpy as np
 import cv2
 import Queue
 
 from threading import Thread, Event
 
-class StreamFilter():
+class StreamFilter(Thread):
     def __init__(self, stream_id):
+        Thread.__init__(self)
+
         self.id = stream_id
 
         self.inputQueue = Queue.Queue()
         self.outputQueue = Queue.Queue()
 
         self.operations = []
-        self.operations_args = []
+
+    def get_id(self):
+        return self.id
+
+    def add_frame(self, frame, device_id=-1):
+        self.inputQueue.put((frame, device_id))
 
     def get_frame(self):
         if self.outputQueue.empty() is False:
             return self.outputQueue.get()
 
-    def add_operation(self, operation_name):
-        self.operations.extend([operation_name])
+    def add_operation(self, operation_name, **kwargs):
+        self.operations.extend([(operation_name, kwargs)])
 
-    def add_frame(self, frame):
-        self.inputQueue.put(frame)
-
-    def evaluate_operations(self):
-        for operation in self.operations:
-            operation()
+    ##########
+    # Operations
+    ##########
 
     def bg_subtraction(self, frame):
 		if isinstance(frame, (np.ndarray, np.generic)):
@@ -35,8 +42,25 @@ class StreamFilter():
 		else:
 			return frame
 
-    def printHello(self):
-        print "Hello"
+    def printHello(self, frame, Value=0):
+        print "Hello " + str(Value)
 
-    def printGoodBye(self):
+    def printGoodBye(self, frame):
         print "Goodbye"
+
+    ##########
+    # Run Function
+    ##########
+
+    def run(self):
+        while True:
+        #    frame, device_id = self.inputQueue.get(True)
+            frame = None
+
+            for operation in self.operations:
+                if not operation[1]:
+                    frame = operation[0](frame)
+                else:
+                    frame = operation[0](frame, operation[1])
+
+        #    self.outputQueue.put((frame, device_id))

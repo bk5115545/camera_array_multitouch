@@ -1,3 +1,6 @@
+
+# Written By Alex Jaeger and Blaise Koch UALR EAC 2015
+
 import sys, cv2
 from threading import Thread, Event
 import numpy as np
