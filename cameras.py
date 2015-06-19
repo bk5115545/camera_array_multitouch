@@ -1,11 +1,7 @@
-
 # Written By Blaise Koch and Alex Jaeger UALR EAC 2015
 
 import sys, time
-
-from CameraArray import CameraDevice
-from CameraArray import StreamFilter
-
+from CameraArray import *
 import cv2
 
 ########################################################################
