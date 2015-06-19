@@ -4,21 +4,18 @@
 import sys, time
 
 from CameraArray import CameraDevice
-from CameraArray import StreamFilter
 
 import cv2
 
 ########################################################################
 ########################################################################
 
-device_ids = [0, 1]
+device_ids = [2, 1]
 devices = []
-streams = []
 
 if __name__ == "__main__":
 		for ID in device_ids:
 			device = CameraDevice(ID)
-			s_filter = StreamFilter(ID)
 
 			if device.acquire_camera():
 				device.start()
@@ -28,14 +25,11 @@ if __name__ == "__main__":
 				del device
 				continue
 
-			s_filter.start()
-			streams.extend([s_filter])
-
 		try:
 			while True:
 				for dev in devices:
 					frame = dev.get_frame()
-					streams[dev.get_device_id()].add_frame(frame) #automatically shows stream
+					cv2.imshow("Device: " + str(dev.get_device_id()), frame)
 
 				if cv2.waitKey(1) & 0xFF == ord('q'):
 					break

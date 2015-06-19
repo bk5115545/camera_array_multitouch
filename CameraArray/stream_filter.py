@@ -45,6 +45,9 @@ class StreamFilter(Thread):
     def printHello(self, frame, Value=0):
         print "Hello " + str(Value)
 
+    def printSomething(self, frame, Value=0, Blah=0):
+        print "Something " + str(Value) + str(Blah)
+
     def printGoodBye(self, frame):
         print "Goodbye"
 
@@ -58,9 +61,10 @@ class StreamFilter(Thread):
             frame = None
 
             for operation in self.operations:
+                #print operation[1]
                 if not operation[1]:
                     frame = operation[0](frame)
                 else:
-                    frame = operation[0](frame, operation[1])
+                    frame = operation[0](frame, **operation[1])
 
         #    self.outputQueue.put((frame, device_id))
