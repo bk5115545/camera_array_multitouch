@@ -3,7 +3,7 @@
 ### Tests stream_filter.py method choosing
 
 
-import CameraArray
+from CameraArray import StreamFilter
 
 s_filter = StreamFilter(0)
 

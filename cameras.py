@@ -3,8 +3,11 @@
 
 import sys, time
 
-import CameraArray
+from CameraArray import CameraDevice
+from CameraArray import StreamFilter
+
 import cv2
+
 ########################################################################
 ########################################################################
 
