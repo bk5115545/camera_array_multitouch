@@ -7,6 +7,7 @@ import Queue
 import collections
 
 from threading import Thread, Event, Lock
+import time
 
 class StreamFilter(Thread):
     def __init__(self, stream_id, shutdown_event = Event()):
@@ -55,6 +56,7 @@ class StreamFilter(Thread):
                     frame = operation[0](frame, **operation[1])
 
             with self.output_lock:
+		print("outputting: " + str(frame))
                 self.outputQueue.put((frame, device_id))
 
     def get_id(self):
@@ -68,13 +70,13 @@ class StreamFilter(Thread):
 	return True
 
     def get_frame(self, latest = False, wait = False):
-        img = None
+        img, device_id = None, None
         if wait:
             if latest:
                 while img is None:
                     try:
                         with self.output_lock:
-                            img = self.output_queue.popleft()
+                            img, device_id = self.output_queue.popleft()
                         break
                     except IndexError:
                         time.sleep(0.01)
@@ -82,7 +84,7 @@ class StreamFilter(Thread):
                 while img is None:
                     try:
                         with self.output_lock:
-                            img = self.output_queue.pop()
+                            img, device_id = self.output_queue.pop()
                         break
                     except IndexError:
                         time.sleep(0.01)
@@ -90,10 +92,10 @@ class StreamFilter(Thread):
             try:
                 if latest:
                     with self.output_lock:
-                        img = self.output_queue.popleft()
+                        img, device_id = self.output_queue.popleft()
                 else:
                     with self.output_lock:
-                        img = self.output_queue.pop()
+                        img, device_id = self.output_queue.pop()
             except IndexError:
                 pass
         return img
