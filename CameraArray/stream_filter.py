@@ -36,8 +36,11 @@ class StreamFilter(Thread):
             frame = None
             device_id = -1
             try:
+		print("Waiting on self.input_lock.")
                 with self.input_lock:
+                    print("StreamFilter: Reterieving frame from input queue.")
                     frame, device_id = self.input_queue.get(True)
+                    print("Retrieved.")
             except Queue.Empty:  #Queue.get has an implicit timeout that we should catch and try again on 
                 continue
 
@@ -51,7 +54,9 @@ class StreamFilter(Thread):
                 else:
                     frame = operation[0](frame, **operation[1])
 
+            print("StreamFilter: Waiting on self.output_lock.")
             with self.output_lock:
+		print("StreamFilter: Adding frame to stream filter output.")
                 self.outputQueue.put((frame, device_id))
 
     def get_id(self):
