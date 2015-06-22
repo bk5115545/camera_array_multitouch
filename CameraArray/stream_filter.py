@@ -30,7 +30,8 @@ class StreamFilter(Thread):
                                 "MOG2": cv2.BackgroundSubtractorMOG2(), \
 ##                              "GMG":  cv2.BackgroundSubtractorGMG()   \
                               }
-
+                              
+        self.blob_detector = cv2.SimpleBlobDetector()
 
     def run(self):
         while not self.shutdown_event.is_set():
@@ -40,13 +41,13 @@ class StreamFilter(Thread):
                 with self.input_lock:
                     frame, device_id = self.input_queue.get_nowait()
             except Queue.Empty:  #Queue.get has an implicit timeout that we should catch and try again on 
-		time.sleep(0.01)
-                continue
+				time.sleep(0.01)
+				continue
 
             if frame is None or not isinstance(frame, (np.ndarray, np.generic)) or isinstance(frame, bool):
-		print("wtf...")
-		time.sleep(0.01)
-		continue
+				print("wtf...")
+				time.sleep(0.01)
+				continue
 
             operations_tmp = []
             with self.operations_lock:
@@ -57,10 +58,12 @@ class StreamFilter(Thread):
                     frame = operation[0](frame)
                 else:
                     frame = operation[0](frame, **operation[1])
+                if frame is None:
+					print("Dropping dead frame.")
+					continue 
 		
 
             with self.output_lock:
-		print("outputting: " + str(frame))
                 self.output_queue.append((frame, device_id))
 
     def get_id(self):
@@ -68,11 +71,10 @@ class StreamFilter(Thread):
 
     def add_frame(self, frame, device_id=-1):
         with self.input_lock:
-            if self.input_queue.full():
-		return False
-	    print frame
-            self.input_queue.put((frame, device_id))
-	return True
+			if self.input_queue.full():
+				return False
+			self.input_queue.put((frame, device_id))
+			return True
 
     def get_frame(self, latest = False, wait = False):
         img, device_id = None, None
@@ -118,6 +120,11 @@ class StreamFilter(Thread):
         with self.input_lock:
             self.input_queue.empty()
 
+	def blob_detection(self, frame):
+		blobs = self.detector.detect(frame)
+		frame = cv2.drawKeypoints(frame, blobs, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+		return frame
+	
     def bg_subtraction(self, frame, algo="MOG"):
         if isinstance(frame, (np.ndarray, np.generic)):
             try:

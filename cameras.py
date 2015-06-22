@@ -8,19 +8,22 @@ import sys, time
 ########################################################################
 ########################################################################
 
-device_ids = [0, 1]
+device_ids = [0]
 devices = []
 
+stream_ids = [0]
 streams = []
 
 if __name__ == "__main__":
+	
+	for ID in stream_ids:
+		stream = StreamFilter(ID)
+		
+		stream.add_operation(stream.bg_subtraction, algo="MOG")
+		#stream.add_operation(stream.blob_detection)
 
-	bg_sub_stream = StreamFilter(0)
-	streams.extend([bg_sub_stream])
-
-	bg_sub_stream.add_operation(bg_sub_stream.bg_subtraction, algo="MOG")
-
-	bg_sub_stream.start()
+		streams.extend([stream])
+		streams[ID].start()
 
 	for ID in device_ids:
 		device = CameraDevice(ID)
@@ -28,6 +31,7 @@ if __name__ == "__main__":
 		if device.acquire_camera():
 			device.start()
 			devices.extend([device])
+		
 		else:
 			device.release_camera()
 			del device
@@ -37,12 +41,13 @@ if __name__ == "__main__":
 		while True:
 			for dev in devices:
 				frame = dev.get_frame()
-
-				bg_sub_stream.add_frame(frame, dev.get_device_id())
-				fg_mask = bg_sub_stream.get_frame()
-
+				
+				streams[dev.get_device_id()].add_frame(frame, dev.get_device_id())
+				frame = streams[dev.get_device_id()].get_frame()
+				frame = streams[dev.get_device_id()].blob_detection(frame)
+				
 				try:
-					cv2.imshow("Device: " + str(dev.get_device_id()), fg_mask)
+					cv2.imshow("Device: " + str(dev.get_device_id()), frame)
 				except Exception:
 					time.sleep(0.1)
 
