@@ -2,7 +2,7 @@
 # Written By Alex Jaeger and Blaise Koch UALR EAC 2015
 
 import sys, cv2
-from threading import Thread, Event
+from threading import Thread, Event, Lock
 import numpy as np
 
 class CameraDevice(Thread):
@@ -14,31 +14,39 @@ class CameraDevice(Thread):
 		self.stop_event = Event() if stop_event is None else stop_event
 
 		self.acquired = False
+		self.frame_lock = Lock()
 		self.frame = None
+		self.capture_lock = Lock()
 		self.capture = None
 
 	def acquire_camera(self):
 		if self.acquired:
 			return self.acquired
 		else:
-			self.capture = cv2.VideoCapture(self.device_id)
+			with self.capture_lock:
+				self.capture = cv2.VideoCapture(self.device_id)
+			self.acquired = True
 
 		if not self.capture.isOpened():
 			try:
-				self.capture.open()
+				with self.capture_lock:
+					self.capture.open()
+				self.acquired = True
 			except:
 				return self.acquired
 
 		if self.height is not None:
 			try:
-				self.capture.set(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT, self.height)
+				with self.capture_lock:
+					self.capture.set(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT, self.height)
 			except Exception as e:
 				sys.stderr.write("Error setting capture height to " + str(self.height) + " on camera device " + str(self.device_id) + "\r\n")
 				sys.stderr.write(str(e) + "\r\n")
 
 		if self.width is not None:
 			try:
-				self.capture.set(cv2.cv.CV_CAP_PROP_FRAME_WIDTH, self.width)
+				with self.capture_lock:
+					self.capture.set(cv2.cv.CV_CAP_PROP_FRAME_WIDTH, self.width)
 			except Exception as e:
 				sys.stderr.write("Error setting capture width to " + str(self.width) + " on camera device " + str(self.device_id) + "\r\n")
 				sys.stderr.write(str(e) + "\r\n")
@@ -48,8 +56,9 @@ class CameraDevice(Thread):
 
 	def release_camera(self):
 		try:
-			self.capture.release()
-			self.capture = None
+			with self.capture_lock:
+				self.capture.release()
+				self.capture = None
 			self.acquired = False
 		except:
 			return False
@@ -60,7 +69,8 @@ class CameraDevice(Thread):
 
 	def get_frame(self):
 		if self.frame is not None:
-			return self.frame
+			with self.frame_lock:
+				return self.frame
 		else:
 			return self.acquired
 
@@ -69,15 +79,26 @@ class CameraDevice(Thread):
 
 	def run(self):
 		while not self.stop_event.is_set():
-			ret, frame = self.capture.read()
+			ret, frame = None, None
+			with self.capture_lock:
+				ret, frame = self.capture.read()
 
 			if ret:
-				self.frame = frame
+				with self.frame_lock:
+					self.frame = frame
 			else:
 				sys.stderr.write("Problem reading frame for device " + str(self.device_id) + "\r\n")
 
 	def get_height(self):
-		return self.capture.get(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT) if self.height is None else self.height
+		with self.capture_lock:
+			if self.capture:
+				return self.capture.get(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT) if self.height is None else self.height
+			else:
+				return -1
 
 	def get_width(self):
-		return self.capture.get(cv2.cv.CV_CAP_PROP_FRAME_WIDTH) if self.width is None else self.width
+		with self.capture_lock:
+			if self.capture:
+				return self.capture.get(cv2.cv.CV_CAP_PROP_FRAME_WIDTH) if self.width is None else self.width
+			else:
+				return -1
