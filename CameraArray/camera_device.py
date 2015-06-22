@@ -52,6 +52,7 @@ class CameraDevice(Thread):
 				sys.stderr.write(str(e) + "\r\n")
 
 		self.acquired = True
+		self.start()
 		return self.acquired
 
 	def release_camera(self):
