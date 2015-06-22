@@ -32,7 +32,7 @@ class CameraDevice(Thread):
 				with self.capture_lock:
 					self.capture.open()
 				self.acquired = True
-			except:
+			except Exception:
 				return self.acquired
 
 		if self.height is not None:
@@ -60,7 +60,7 @@ class CameraDevice(Thread):
 				self.capture.release()
 				self.capture = None
 			self.acquired = False
-		except:
+		except Exception:
 			return False
 		return True
 
@@ -68,11 +68,11 @@ class CameraDevice(Thread):
 		self.stop_event.set()
 
 	def get_frame(self):
-		if self.frame is not None:
-			with self.frame_lock:
+		with self.frame_lock:
+			if self.frame is not None:
 				return self.frame
-		else:
-			return self.acquired
+			else:
+				return self.acquired
 
 	def get_device_id(self):
 		return self.device_id

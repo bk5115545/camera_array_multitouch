@@ -26,9 +26,9 @@ class StreamFilter(Thread):
         self.operations_lock = Lock()
         
         self.bg_subtractors = {
-                                "MOG":cv2.BackgroundSubtractorMOG(),    \
+                                "MOG":  cv2.BackgroundSubtractorMOG(),  \
                                 "MOG2": cv2.BackgroundSubtractorMOG2(), \
-##                              "GMG": cv2.BackgroundSubtractorGMG()    \
+##                              "GMG":  cv2.BackgroundSubtractorGMG()   \
                               }
 
 
@@ -38,12 +38,15 @@ class StreamFilter(Thread):
             device_id = -1
             try:
                 with self.input_lock:
-                    try:
-                        frame, device_id = self.input_queue.get_nowait()
-                    except Queue.Empty:
-			time.sleep(0.01)
+                    frame, device_id = self.input_queue.get_nowait()
             except Queue.Empty:  #Queue.get has an implicit timeout that we should catch and try again on 
+		time.sleep(0.01)
                 continue
+
+            if frame is None or not isinstance(frame, (np.ndarray, np.generic)) or isinstance(frame, bool):
+		print("wtf...")
+		time.sleep(0.01)
+		continue
 
             operations_tmp = []
             with self.operations_lock:
@@ -54,10 +57,11 @@ class StreamFilter(Thread):
                     frame = operation[0](frame)
                 else:
                     frame = operation[0](frame, **operation[1])
+		
 
             with self.output_lock:
 		print("outputting: " + str(frame))
-                self.outputQueue.put((frame, device_id))
+                self.output_queue.append((frame, device_id))
 
     def get_id(self):
         return self.id
@@ -66,6 +70,7 @@ class StreamFilter(Thread):
         with self.input_lock:
             if self.input_queue.full():
 		return False
+	    print frame
             self.input_queue.put((frame, device_id))
 	return True
 
@@ -116,8 +121,8 @@ class StreamFilter(Thread):
     def bg_subtraction(self, frame, algo="MOG"):
         if isinstance(frame, (np.ndarray, np.generic)):
             try:
-                return self.bg_subtractors[algo.uppercase()].apply(frame)
-            except:
+                return self.bg_subtractors[algo.upper()].apply(frame)
+            except IndexError:
                 return Exception("No such background subtraction algorithm.\nValid algorithms are " + ", ".join(bg_subtractors.keys()))
         else:
             return frame

@@ -8,7 +8,7 @@ import sys, time
 ########################################################################
 ########################################################################
 
-device_ids = [2, 1]
+device_ids = [0, 1]
 devices = []
 
 streams = []
@@ -41,7 +41,10 @@ if __name__ == "__main__":
 				bg_sub_stream.add_frame(frame, dev.get_device_id())
 				fg_mask = bg_sub_stream.get_frame()
 
-				cv2.imshow("Device: " + str(dev.get_device_id()), fg_mask)
+				try:
+					cv2.imshow("Device: " + str(dev.get_device_id()), fg_mask)
+				except Exception:
+					time.sleep(0.1)
 
 			if cv2.waitKey(1) & 0xFF == ord('q'):
 				break
@@ -55,5 +58,9 @@ if __name__ == "__main__":
 
 		device.release_camera()
 		del device
+
+	bg_sub_stream.terminate()
+	time.sleep(0.5)
+	del bg_sub_stream
 
 	cv2.destroyAllWindows()
