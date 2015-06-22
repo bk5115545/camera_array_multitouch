@@ -60,7 +60,6 @@ class StreamFilter(Thread):
 		
 
             with self.output_lock:
-		print("outputting: " + str(frame))
                 self.output_queue.append((frame, device_id))
 
     def get_id(self):
@@ -70,7 +69,6 @@ class StreamFilter(Thread):
         with self.input_lock:
             if self.input_queue.full():
 		return False
-	    print frame
             self.input_queue.put((frame, device_id))
 	return True
 
