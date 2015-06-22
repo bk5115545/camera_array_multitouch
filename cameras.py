@@ -22,9 +22,8 @@ if __name__ == "__main__":
 			devices[ID] = device
 			streams[ID] = StreamFilter(ID)
 			
-			
 			streams[ID].add_operation(streams[ID].bg_subtraction, algo="MOG")
-			#stream.add_operation(stream.blob_detection)
+			streams[ID].add_operation(streams[ID].namefdsa)
 			
 			streams[ID].start()
 

@@ -119,17 +119,17 @@ class StreamFilter(Thread):
         self.shutdown_event.set()
         with self.input_lock:
             self.input_queue.empty()
+    
+	def bg_subtraction(self, frame, algo="MOG"):
+		if isinstance(frame, (np.ndarray, np.generic)):
+			try:
+				return self.bg_subtractors[algo.upper()].apply(frame)
+			except IndexError:
+				return Exception("No such background subtraction algorithm.\nValid algorithms are " + ", ".join(bg_subtractors.keys()))
+		else:
+			return frame
 
-	def blob_detection(self, frame):
+	def namefdsa(self, frame):
 		blobs = self.detector.detect(frame)
 		frame = cv2.drawKeypoints(frame, blobs, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
 		return frame
-	
-    def bg_subtraction(self, frame, algo="MOG"):
-        if isinstance(frame, (np.ndarray, np.generic)):
-            try:
-                return self.bg_subtractors[algo.upper()].apply(frame)
-            except IndexError:
-                return Exception("No such background subtraction algorithm.\nValid algorithms are " + ", ".join(bg_subtractors.keys()))
-        else:
-            return frame
